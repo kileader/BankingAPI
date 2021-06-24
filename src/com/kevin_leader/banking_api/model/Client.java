@@ -4,13 +4,28 @@ import java.util.ArrayList;
 
 public class Client {
 	
+	private int id;
 	private String clientEmail;
 	private String password;
 	private String clientName;
 	private ArrayList<Account> ownedAccounts;
 	
-	public Client() {}
+	public Client() {
+		
+	}
+	public Client(int id, String clientEmail, String password, String clientName) {
+		this.id = id;
+		this.clientEmail = clientEmail;
+		this.password = password;
+		this.clientName = clientName;
+	}
 	
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
 	public String getClientEmail() {
 		return clientEmail;
 	}
@@ -35,7 +50,5 @@ public class Client {
 	public void setOwnedAccounts(ArrayList<Account> ownedAccounts) {
 		this.ownedAccounts = ownedAccounts;
 	}
-	
-	
 	
 }
