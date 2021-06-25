@@ -1,4 +1,4 @@
-package com.kevin_leader.banking_api.controller;
+package main.com.kevin_leader.banking_api.controller;
 
 import java.util.ArrayList;
 
