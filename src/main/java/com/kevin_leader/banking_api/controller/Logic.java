@@ -1,4 +1,4 @@
-package main.com.kevin_leader.banking_api.controller;
+package com.kevin_leader.banking_api.controller;
 
 import java.util.ArrayList;
 
@@ -8,8 +8,18 @@ import com.kevin_leader.banking_api.model.Client;
 @SuppressWarnings("null")
 public class Logic {
 	
+	public Logic() {
+
+	}
+	
+	public static void main(String[] args) {
+		Logic logic = new Logic();
+		logic.createClient(0, "hi@hi.com", "abc123", "Kirby");
+	}
+	
 	// Create new client
 	public void createClient(int id, String clientEmail, String password, String clientName) {
+
 		Client newClient = new Client(id, clientEmail, password, clientName);
 	}
 	
