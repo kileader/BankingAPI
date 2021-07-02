@@ -50,4 +50,16 @@ public class AccountRepoImpl implements AccountRepo {
 		return FakeDB.accounts.remove(id);
 	}
 
+	@Override
+	public double withdraw(double withdrawalAmount) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double deposit(double depositAmount) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }
