@@ -1,5 +1,10 @@
 package com.kevin_leader.models;
 
+/**
+ * Javabean representing a bank client
+ * @author Kevin Leader
+ * @since 07/01/2021
+ */
 public class Client {
 	
 	private int id;
@@ -7,15 +12,44 @@ public class Client {
 	private String lastName;
 	private String email;
 	private String password;
-	
+//	private List<Account> ownedAccounts;
+
+	/**
+	 * No-args constructor
+	 */
 	public Client() {}
 	
+	/**
+	 * Full constructor specifying an id
+	 * @param id
+	 * @param firstName
+	 * @param lastName
+	 * @param email
+	 * @param password
+	 */
 	public Client(int id, String firstName, String lastName, String email, String password) {
 		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
 		this.password = password;
+//		ownedAccounts = new ArrayList<>();
+	}
+	
+	/**
+	 * Id-less constructor
+	 * @param id
+	 * @param firstName
+	 * @param lastName
+	 * @param email
+	 * @param password
+	 */
+	public Client(String firstName, String lastName, String email, String password) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+		this.password = password;
+//		ownedAccounts = new ArrayList<>();
 	}
 	
 	public int getId() {
@@ -57,7 +91,23 @@ public class Client {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
+	
+//	public void putOwnedAccount(Account account) {
+//		ownedAccounts.add(account);
+//	}
+//	
+//	public void removeOwnedAccount(int index) {
+//		ownedAccounts.remove(index);
+//	}
+//	
+//	public Account getOwnedAccount(int key) {
+//		return ownedAccounts.get(key);
+//	}
+//	
+//	public List<Account> getOwnedAccounts() {
+//		return ownedAccounts;
+//	}
+	
 	@Override
 	public String toString() {
 		return "Client [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email

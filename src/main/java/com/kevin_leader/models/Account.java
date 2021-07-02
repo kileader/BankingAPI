@@ -1,5 +1,10 @@
 package com.kevin_leader.models;
 
+/**
+ * Javabean representing a bank account
+ * @author Kevin Leader
+ * @since 07/01/2021
+ */
 public class Account {
 	
 	private int id;
@@ -8,14 +13,38 @@ public class Account {
 	private String accountType;
 	private double balance;
 	
+	/**
+	 * No-args constructor
+	 */
 	public Account() {}
 	
+	/**
+	 * Full constructor
+	 * @param id			unique integer for each entry
+	 * @param clientId		id for the owner of the account
+	 * @param accountName	name for the account
+	 * @param accountType	type of account (checking, savings, etc.)
+	 * @param balance		current amount of funds in USD
+	 */
 	public Account(int id, int clientId, String accountName, String accountType, double balance) {
 		this.id = id;
 		this.clientId = clientId;
 		this.accountName = accountName;
 		this.accountType = accountType;
 		this.balance = balance;
+	}
+	
+	/**
+	 * Id-less and balance-less constructor
+	 * @param clientId		id for the owner of the account
+	 * @param accountName	name for the account
+	 * @param accountType	type of account (checking, savings, etc.)
+	 */
+	public Account(int clientId, String accountName, String accountType) {
+		this.clientId = clientId;
+		this.accountName = accountName;
+		this.accountType = accountType;
+		balance = 0;
 	}
 
 	public int getId() {
