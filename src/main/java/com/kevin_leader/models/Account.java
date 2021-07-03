@@ -3,7 +3,6 @@ package com.kevin_leader.models;
 /**
  * Javabean representing a bank account
  * @author Kevin Leader
- * @since 07/01/2021
  */
 public class Account {
 	
@@ -26,7 +25,8 @@ public class Account {
 	 * @param accountType	type of account (checking, savings, etc.)
 	 * @param balance		current amount of funds in USD
 	 */
-	public Account(int id, int clientId, String accountName, String accountType, double balance) {
+	public Account(int id, int clientId, String accountName,
+			String accountType, double balance) {
 		this.id = id;
 		this.clientId = clientId;
 		this.accountName = accountName;
@@ -89,7 +89,8 @@ public class Account {
 
 	@Override
 	public String toString() {
-		return "Account [id=" + id + ", clientId=" + clientId + ", accountName=" + accountName + ", accountType="
+		return "Account [id=" + id + ", clientId=" + clientId + 
+				", accountName=" + accountName + ", accountType="
 				+ accountType + ", balance=" + balance + "]";
 	}
 	

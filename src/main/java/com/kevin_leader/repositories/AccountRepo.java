@@ -47,16 +47,24 @@ public interface AccountRepo {
 	
 	/**
 	 * Withdraw money from the account's balance
+	 * @param id id of the account
 	 * @param withdrawalAmount the amount to withdraw
-	 * @return the amount withdrawn
+	 * @return a result message
 	 */
-	public double withdraw(double withdrawalAmount);
+	public Account withdraw(int id, double withdrawalAmount);
 	
 	/**
 	 * Deposit money to the account's balance
+	 * @param id id of the account
 	 * @param depositAmount the amount to deposit
-	 * @return the amount deposited
+	 * @return a result message
 	 */
-	public double deposit(double depositAmount);
+	public Account deposit(int id, double depositAmount);
 
+	/**
+	 * Get all of a client's accounts
+	 * @param clientId the client's id
+	 * @return the client's accounts
+	 */
+	public List<Account> getAllAccountsForClient(int clientId);
 }
