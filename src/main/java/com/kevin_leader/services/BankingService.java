@@ -29,6 +29,13 @@ public interface BankingService {
 	public Account deposit(int id, double depositAmount);
 	
 	/**
+	 * Get all accounts for a client
+	 * @param clientId	the client's id
+	 * @return client's accounts
+	 */
+	public List<Account> getAllAccountsForClient(int clientId);
+	
+	/**
 	 * Get all accounts for a client between two balance values
 	 * @param clientId	the client's id
 	 * @param lowLimit	the lowest balance for an account
@@ -36,7 +43,7 @@ public interface BankingService {
 	 * @return client's accounts between the low and high limits
 	 */
 	public List<Account> getAllAccountsForClientBetweenBalances(
-			int clientId, double lowLimit, double highLimit);
+			int clientId, int lowLimit, int highLimit);
 	
 	/**
 	 * Get a specific account given the client id and account id
@@ -44,16 +51,23 @@ public interface BankingService {
 	 * @param accountId	the account's id
 	 * @return the account
 	 */
-	public Account getAccountForClientGivenAccountId(
-			int clientId, int accountId);
+	public Account getAccountForClient(int clientId, int accountId);
+	
+	/**
+	 * Delete a specific account given the client id and account id
+	 * @param clientId
+	 * @param accountId
+	 * @return the account
+	 */
+	public Account deleteAccountForClient(int clientId, int accountId);
 	
 	/**
 	 * Transfer funds between two of a client's accounts
-	 * @param clientId
-	 * @param accountToSendId
-	 * @param accountToReceiveId
-	 * @param transferAmount
-	 * @return transferAmount
+	 * @param clientId				the client's id
+	 * @param accountToSendId		the account to send money from
+	 * @param accountToReceiveId	the account to receive money
+	 * @param transferAmount		the transfer amount
+	 * @return true if successful
 	 */
 	public boolean transferBetweenAccounts(int clientId, int accountToSendId,
 			int accountToReceiveId, double transferAmount);

@@ -198,12 +198,6 @@ public class AccountRepoImpl implements AccountRepo {
 		return null;
 	}
 
-	@Override
-	public List<Account> getAllAccountsForClient(int clientId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 // FAKE DB STUFF BELOW
 //
 //	@Override

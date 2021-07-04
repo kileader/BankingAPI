@@ -21,10 +21,11 @@ public class JDBCConnection {
 		if (conn == null) {
 			
 			// Establish Connection
-			String endpoint = "revature-projects.c3w8xexsymza.us-east-2.rds.amazonaws.com";
+			String endpoint = "revature-projects.c3w8xexsymza."
+					+ "us-east-2.rds.amazonaws.com";
 			
-			//URL Format (postgres JDBC):
-			//jdbc:postgresql://[endpoint]/[database]
+			// URL Format (postgres JDBC):
+			// jdbc:postgresql://[endpoint]/[database]
 			String url = "jdbc:postgresql://" + endpoint + "/postgres";
 			String username = "kevin";
 			String password = "password"; // Don't do this commercially

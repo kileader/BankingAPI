@@ -8,6 +8,10 @@ import com.kevin_leader.models.Client;
 import com.kevin_leader.repositories.AccountRepo;
 import com.kevin_leader.repositories.ClientRepo;
 
+/**
+ * Service operations implemented for banking api
+ * @author Kevin Leader
+ */
 public class BankingServiceImpl implements BankingService {
 	
 	public ClientRepo cr;
@@ -79,26 +83,45 @@ public class BankingServiceImpl implements BankingService {
 	}
 
 	@Override
+	public List<Account> getAllAccountsForClient(int clientId) {
+		List<Account> allAccounts = ar.getAllAccounts();
+		List<Account> clientAccounts = new ArrayList<>();
+		
+		// Find the user's accounts
+		for (Account account : allAccounts) {
+			if (account.getClientId() == clientId) {
+				clientAccounts.add(account);
+			}
+		}
+		return clientAccounts;
+	}
+	
+	@Override
 	public List<Account> getAllAccountsForClientBetweenBalances(
-			int clientId, double lowLimit, double highLimit) {
+			int clientId, int lowLimit, int highLimit) { //TODO: Fix this
 		List<Account> allAccounts = ar.getAllAccounts();
 		List<Account> clientAccountsBetweenLimits = new ArrayList<>();
+		
+		// Find the user's accounts between the limits
 		for (Account account : allAccounts) {
-			if (account.getClientId() == clientId && account.getBalance() < highLimit
-					&& account.getBalance() > highLimit) {
+			if (account.getClientId() == clientId
+					&& account.getBalance() < (double) highLimit
+					&& account.getBalance() > (double) lowLimit) {
 				clientAccountsBetweenLimits.add(account);
 			}
 		}
 		return clientAccountsBetweenLimits;
-		
 	}
-
+	
 	@Override
-	public Account getAccountForClientGivenAccountId(int clientId, int accountId) {
+	public Account getAccountForClient(int clientId, int accountId) {
 		List<Account> allAccounts = ar.getAllAccounts();
 		Account foundAccount = null;
+		
+		// Find the account matching the clientId and accountId
 		for (Account account : allAccounts) {
-			if (account.getClientId() == clientId && account.getId() == accountId) {
+			if (account.getClientId() == clientId 
+					&& account.getId() == accountId) {
 				foundAccount = account;
 				break;
 			}
@@ -107,11 +130,28 @@ public class BankingServiceImpl implements BankingService {
 	}
 
 	@Override
-	public double transferBetweenAccounts(int clientId, int accountToSendId,
+	public Account deleteAccountForClient(int clientId, int accountId) {
+		List<Account> allAccounts = ar.getAllAccounts();
+		Account accountToDelete = null;
+		
+		for (Account account : allAccounts) {
+			if (account.getClientId() == clientId 
+					&& account.getId() == accountId) {
+				accountToDelete = account;
+				break;
+			}
+		}
+		return ar.deleteAccount(accountToDelete.getId());
+	}
+	
+	@Override
+	public boolean transferBetweenAccounts(int clientId, int accountToSendId,
 			int accountToReceiveId, double transferAmount) {
 		List<Account> allAccounts = ar.getAllAccounts();
 		Account accountToSend = null;
 		Account accountToReceive = null;
+		
+		// Find the account to send and account to receive
 		for (Account account : allAccounts) {
 			if (clientId == account.getClientId()) {
 				if (accountToSendId == account.getId()) {
@@ -124,11 +164,16 @@ public class BankingServiceImpl implements BankingService {
 				}
 			}
 		}
-		if (accountToSend.getBalance() > transferAmount) {
-			ar.withdraw(transferAmount);
-			ar.deposit()
-		} // TODO: design some exception handling
-		return -1;
+		
+		// If at least one wasn't found, return false
+		if (accountToSend == null || accountToReceive == null) {
+			return false;
+		}
+		
+		// Do withdraw and deposit methods to transfer
+		ar.withdraw(accountToSendId, transferAmount);
+		ar.deposit(accountToReceiveId, transferAmount);
+		return true;
 	}
 
 }

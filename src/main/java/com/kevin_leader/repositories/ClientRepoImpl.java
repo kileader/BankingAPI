@@ -11,7 +11,7 @@ import com.kevin_leader.models.Client;
 import com.kevin_leader.util.JDBCConnection;
 
 /**
- * Client repository implementation to do CRUD operations
+ * Client repository implementation to do CRUD operations on database
  * @author Kevin Leader
  */
 public class ClientRepoImpl implements ClientRepo {

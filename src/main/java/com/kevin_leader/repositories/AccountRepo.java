@@ -60,11 +60,4 @@ public interface AccountRepo {
 	 * @return a result message
 	 */
 	public Account deposit(int id, double depositAmount);
-
-	/**
-	 * Get all of a client's accounts
-	 * @param clientId the client's id
-	 * @return the client's accounts
-	 */
-	public List<Account> getAllAccountsForClient(int clientId);
 }

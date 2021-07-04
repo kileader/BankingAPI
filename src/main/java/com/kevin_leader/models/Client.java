@@ -37,7 +37,6 @@ public class Client {
 	
 	/**
 	 * Id-less constructor
-	 * @param id
 	 * @param firstName
 	 * @param lastName
 	 * @param email

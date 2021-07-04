@@ -39,12 +39,14 @@ public class Account {
 	 * @param clientId		id for the owner of the account
 	 * @param accountName	name for the account
 	 * @param accountType	type of account (checking, savings, etc.)
+	 * @param balance		starting balance of the account
 	 */
-	public Account(int clientId, String accountName, String accountType) {
+	public Account(int clientId, String accountName,
+			String accountType, double balance) {
 		this.clientId = clientId;
 		this.accountName = accountName;
 		this.accountType = accountType;
-		balance = 0;
+		this.balance = balance;
 	}
 
 	public int getId() {
