@@ -61,7 +61,7 @@ public class AccountRepoImpl implements AccountRepo {
 	@Override
 	public List<Account> getAllAccounts() {
 		
-		String sql = "SELECT * FROM accounts";
+		String sql = "SELECT * FROM accounts ORDER BY id";
 		
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -109,7 +109,7 @@ public class AccountRepoImpl implements AccountRepo {
 	public Account updateAccount(Account changedAccount) {
 		
 		String sql = "UPDATE accounts SET client_id = ?, account_name = ?,"
-				+ " account_type = ?, balance = ? WHERE id = ?";
+				+ " account_type = ?, balance = ? WHERE id = ? RETURNING *";
 		
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -161,7 +161,13 @@ public class AccountRepoImpl implements AccountRepo {
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			
-			ps.setDouble(1, getAccount(id).getBalance() - withdrawalAmount);
+			try {
+				ps.setDouble(1, getAccount(id).getBalance() - withdrawalAmount);
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+				return null;
+			}
+			
 			ps.setInt(2, id);
 			
 			ResultSet rs = ps.executeQuery();
@@ -169,8 +175,9 @@ public class AccountRepoImpl implements AccountRepo {
 			if (rs.next()) {
 				return buildAccount(rs);
 			}
-		} catch (SQLException e) {
 			
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return null;
 	}
@@ -184,7 +191,13 @@ public class AccountRepoImpl implements AccountRepo {
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			
-			ps.setDouble(1, getAccount(id).getBalance() + depositAmount);
+			try {
+				ps.setDouble(1, getAccount(id).getBalance() + depositAmount);
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+				return null;
+			}
+			
 			ps.setInt(2, id);
 			
 			ResultSet rs = ps.executeQuery();
@@ -192,8 +205,9 @@ public class AccountRepoImpl implements AccountRepo {
 			if (rs.next()) {
 				return buildAccount(rs);
 			}
-		} catch (SQLException e) {
 			
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return null;
 	}
@@ -253,7 +267,6 @@ public class AccountRepoImpl implements AccountRepo {
 //
 //	@Override
 //	public String deposit(int id, double depositAmount) {
-//		// TODO Auto-generated method stub
 //		return null;
 //	}
 	

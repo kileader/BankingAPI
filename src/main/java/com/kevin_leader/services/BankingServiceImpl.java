@@ -48,32 +48,16 @@ public class BankingServiceImpl implements BankingService {
 	}
 
 	@Override
-	public Account getAccount(int id) {
-		return ar.getAccount(id);
-	}
-
-	@Override
 	public List<Account> getAllAccounts() {
 		return ar.getAllAccounts();
-	}
-
-	@Override
-	public Account addAccount(Account newAccount) {
-		return ar.addAccount(newAccount);
-	}
-
-	@Override
-	public Account updateAccount(Account changedAccount) {
-		return ar.updateAccount(changedAccount);
-	}
-
-	@Override
-	public Account deleteAccount(int id) {
-		return ar.deleteAccount(id);
 	}
 	
 	@Override
 	public Account withdraw(int id, double withdrawalAmount) {
+		double balance = ar.getAccount(id).getBalance();
+		if (balance < withdrawalAmount) {
+			return null;
+		}
 		return ar.withdraw(id, withdrawalAmount);
 	}
 
@@ -84,11 +68,9 @@ public class BankingServiceImpl implements BankingService {
 
 	@Override
 	public List<Account> getAllAccountsForClient(int clientId) {
-		List<Account> allAccounts = ar.getAllAccounts();
 		List<Account> clientAccounts = new ArrayList<>();
-		
 		// Find the user's accounts
-		for (Account account : allAccounts) {
+		for (Account account : ar.getAllAccounts()) {
 			if (account.getClientId() == clientId) {
 				clientAccounts.add(account);
 			}
@@ -99,11 +81,9 @@ public class BankingServiceImpl implements BankingService {
 	@Override
 	public List<Account> getAllAccountsForClientBetweenBalances(
 			int clientId, int lowLimit, int highLimit) { //TODO: Fix this
-		List<Account> allAccounts = ar.getAllAccounts();
 		List<Account> clientAccountsBetweenLimits = new ArrayList<>();
-		
 		// Find the user's accounts between the limits
-		for (Account account : allAccounts) {
+		for (Account account : ar.getAllAccounts()) {
 			if (account.getClientId() == clientId
 					&& account.getBalance() < (double) highLimit
 					&& account.getBalance() > (double) lowLimit) {
@@ -115,18 +95,36 @@ public class BankingServiceImpl implements BankingService {
 	
 	@Override
 	public Account getAccountForClient(int clientId, int accountId) {
-		List<Account> allAccounts = ar.getAllAccounts();
-		Account foundAccount = null;
-		
 		// Find the account matching the clientId and accountId
-		for (Account account : allAccounts) {
+		for (Account account : ar.getAllAccounts()) {
 			if (account.getClientId() == clientId 
 					&& account.getId() == accountId) {
-				foundAccount = account;
-				break;
+				 return account;
 			}
 		}
-		return foundAccount;
+		return null;
+	}
+	
+	@Override
+	public Account addAccountForClient(Account accountToAdd) {
+		for (Client client : cr.getAllClients()) {
+			if (accountToAdd.getClientId() == client.getId()) {
+				return ar.addAccount(accountToAdd);
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	public Account updateAccountForClient(Account accountToUpdate) {
+		// Find the account matching the clientId and accountId
+		for (Account account : ar.getAllAccounts()) {
+			if (account.getClientId() == accountToUpdate.getClientId() 
+					&& account.getId() == accountToUpdate.getId()) {
+				return ar.updateAccount(accountToUpdate);
+			}
+		}
+		return null;		
 	}
 
 	@Override
@@ -138,10 +136,10 @@ public class BankingServiceImpl implements BankingService {
 			if (account.getClientId() == clientId 
 					&& account.getId() == accountId) {
 				accountToDelete = account;
-				break;
+				return ar.deleteAccount(accountToDelete.getId());
 			}
 		}
-		return ar.deleteAccount(accountToDelete.getId());
+		return null;
 	}
 	
 	@Override
@@ -150,7 +148,6 @@ public class BankingServiceImpl implements BankingService {
 		List<Account> allAccounts = ar.getAllAccounts();
 		Account accountToSend = null;
 		Account accountToReceive = null;
-		
 		// Find the account to send and account to receive
 		for (Account account : allAccounts) {
 			if (clientId == account.getClientId()) {
@@ -164,16 +161,14 @@ public class BankingServiceImpl implements BankingService {
 				}
 			}
 		}
-		
 		// If at least one wasn't found, return false
 		if (accountToSend == null || accountToReceive == null) {
 			return false;
 		}
-		
 		// Do withdraw and deposit methods to transfer
 		ar.withdraw(accountToSendId, transferAmount);
 		ar.deposit(accountToReceiveId, transferAmount);
 		return true;
 	}
-
+	
 }

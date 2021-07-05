@@ -54,11 +54,11 @@ public class App {
 		app.get("/clients/:id/accounts?amountLessThan=*&amountGreaterThan=*",
 				bc.getAllAccountsForClientBetweenBalances); // TODO: Fix This
 		app.get("/clients/:cId/accounts/:aId", bc.getAccountForClient);
-		app.put("/clients/:cId/accounts/:aId", bc.updateAccount);
+		app.put("/clients/:cId/accounts/:aId", bc.updateAccountForClient);
 		// body: accountName, accountType, balance
 		app.delete("/clients/:cId/accounts/:aId", bc.deleteAccountForClient);
-		app.patch("/clients/:cId/accounts/:aId", bc.withdrawOrDeposit);// TODO: Fix This
-		app.patch("/clients/:cId/accounts/:a1Id/transfer/:a2Id",
+		app.patch("/clients/:cId/accounts/:aId", bc.withdrawOrDeposit);
+		app.patch("/clients/:cId/accounts/:aFromId/transfer/:aToId",
 				bc.transferBetweenAccounts); // body: transferAmount
 		
 	}

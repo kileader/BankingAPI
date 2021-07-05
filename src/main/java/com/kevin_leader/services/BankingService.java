@@ -18,15 +18,19 @@ public interface BankingService {
 	public Client addClient(Client newClient);
 	public Client updateClient(Client changedClient);
 	public Client deleteClient(int id);
-	
-	public Account getAccount(int id);
+
 	public List<Account> getAllAccounts();
-	public Account addAccount(Account newAccount);
-	public Account updateAccount(Account changedAccount);
-	public Account deleteAccount(int id);
 	
 	public Account withdraw(int id, double withdrawalAmount);
 	public Account deposit(int id, double depositAmount);
+	
+	
+	/**
+	 * Check for client existence then add an account
+	 * @param accountToAdd
+	 * @return the account added
+	 */
+	public Account addAccountForClient(Account accountToAdd);
 	
 	/**
 	 * Get all accounts for a client
@@ -52,6 +56,13 @@ public interface BankingService {
 	 * @return the account
 	 */
 	public Account getAccountForClient(int clientId, int accountId);
+	
+	/**
+	 * Check for id existence then update an account
+	 * @param accountToUpdate the changed account to update
+	 * @return the updated account
+	 */
+	public Account updateAccountForClient(Account accountToUpdate);
 	
 	/**
 	 * Delete a specific account given the client id and account id

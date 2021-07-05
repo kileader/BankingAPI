@@ -74,7 +74,17 @@ public class BankingController {
 	};
 	
 	public Handler updateClientById = (ctx) -> {
+		String input = ctx.pathParam("id");
+		int clientId;
+		try {
+			clientId = Integer.parseInt(input);
+		} catch (NumberFormatException e) {
+			clientId = -1;
+		}
+		
 		Client c = gson.fromJson(ctx.body(), Client.class);
+		c.setId(clientId);
+		
 		c = bs.updateClient(c);
 		if (c != null) {
 			ctx.result(gson.toJson(c));
@@ -96,9 +106,7 @@ public class BankingController {
 		// Delete client in database and return the deleted client
 		Client client = bs.deleteClient(id);
 		if (client != null) {
-			ctx.result(gson.toJson(client));
-//			ctx.status(204);
-			ctx.status(200);
+			ctx.status(204);
 		} else {
 			ctx.result("{}");
 			ctx.status(404);
@@ -115,7 +123,8 @@ public class BankingController {
 		}
 		// Create account from JSON
 		Account a = gson.fromJson(ctx.body(), Account.class);
-		a = bs.addAccount(a);
+		a.setClientId(clientId);
+		a = bs.addAccountForClient(a);
 		// Set result to the account if successful,
 		// otherwise set to empty object
 		if (a != null) {
@@ -211,7 +220,7 @@ public class BankingController {
 		}
 	};
 	
-	public Handler updateAccount = (ctx) -> {
+	public Handler updateAccountForClient = (ctx) -> {
 		String cIdInput = ctx.pathParam("cId");
 		String aIdInput = ctx.pathParam("aId");
 		
@@ -234,8 +243,14 @@ public class BankingController {
 		a.setId(accountId);
 		a.setClientId(clientId);
 		
+		a = bs.updateAccountForClient(a);
+		
 		if (a != null) {
-			bs.updateAccount(a);
+			ctx.result(gson.toJson(a));
+			ctx.status(200);
+		} else {
+			ctx.result("{}");
+			ctx.status(404);	
 		}
 	};
 	
@@ -260,16 +275,13 @@ public class BankingController {
 		Account a = bs.deleteAccountForClient(clientId, accountId);
 		
 		if (a != null) {	
-			ctx.result(gson.toJson(a));
-			ctx.status(200);
+			ctx.status(204);
 		} else {
-			ctx.result("{}");
 			ctx.status(404);
 		}
 	};
 	
 	public Handler withdrawOrDeposit = (ctx) -> {
-		// TODO: Finish This
 		String cIdInput = ctx.pathParam("cId");
 		String aIdInput = ctx.pathParam("aId");
 		
@@ -279,7 +291,6 @@ public class BankingController {
 		} catch (NumberFormatException e) {
 			clientId = -1;
 		}
-		
 		int accountId;
 		try {
 			accountId = Integer.parseInt(aIdInput);
@@ -287,45 +298,168 @@ public class BankingController {
 			accountId = -1;
 		}
 		
-//		Account a = bs.withdraw(clientId, accountId);
+		Account a = bs.getAccountForClient(clientId, accountId);
+		
+		if (a != null) {
+			
+			WithdrawOrDeposit wd = gson.fromJson(
+					ctx.body(), WithdrawOrDeposit.class);
+			
+			if (wd != null) {
+				if (wd.getDeposit() == 0) {
+					a = bs.withdraw(accountId, wd.getWithdraw());
+				} else {
+					a = bs.deposit(accountId, wd.getDeposit());
+				}
+			}
+			
+			if (a != null) {
+				ctx.result(gson.toJson(a));
+				ctx.status(200);
+			} else {
+				ctx.result("{}");
+				ctx.status(422);
+			}
+			
+		} else {
+			ctx.result("{}");
+			ctx.status(404);
+		}
+		
 	};
 	
 	public Handler transferBetweenAccounts = (ctx) -> {
-		String cIdInput = ctx.pathParam("cId");
-		String a1IdInput = ctx.pathParam("a1Id");
-		String a2IdInput = ctx.pathParam("a2Id"); //TODO: finish this
+		String cIdIn = ctx.pathParam("cId");
+		String aFromIdIn = ctx.pathParam("aFromId");
+		String aToIdIn = ctx.pathParam("aToId");
 		
 		int clientId;
 		try {
-			clientId = Integer.parseInt(cIdInput);
+			clientId = Integer.parseInt(cIdIn);
 		} catch (NumberFormatException e) {
 			clientId = -1;
 		}
-		
-		int account1Id;
+		int accountFromId;
 		try {
-			account1Id = Integer.parseInt(a1IdInput);
+			accountFromId = Integer.parseInt(aFromIdIn);
 		} catch (NumberFormatException e) {
-			account1Id = -1;
+			accountFromId = -1;
+		}
+		int accountToId;
+		try {
+			accountToId = Integer.parseInt(aToIdIn);
+		} catch (NumberFormatException e) {
+			accountToId = -1;
 		}
 		
-		int account2Id;
-		try {
-			account2Id = Integer.parseInt(a2IdInput);
-		} catch (NumberFormatException e) {
-			account2Id = -1;
-		}
+		Account accountFrom = bs.getAccountForClient(clientId, accountFromId);
+		Account accountTo = bs.getAccountForClient(clientId, accountToId);
 		
-		double amount = (double) gson.fromJson(ctx.body(), Object.class);
-		
-		boolean success = bs.transferBetweenAccounts(
-				clientId, account1Id, account2Id, amount);
-		
-		if (success) {	
-			ctx.status(200);
+		if (accountFrom != null && accountTo != null) {
+			
+			Amount amountObject = gson.fromJson(ctx.body(), Amount.class);
+			double amount = amountObject.getAmount();
+			
+			if (amount > 0) {
+				
+				Account withdrawnAccount = bs.withdraw(accountFromId, amount);
+				
+				if (withdrawnAccount != null) {
+					
+					accountTo = bs.deposit(accountToId, amount);
+					
+					Transfer transfer = new Transfer(
+							withdrawnAccount.getBalance(),
+							accountTo.getBalance());
+					
+					ctx.result(gson.toJson(transfer));
+					ctx.status(200);
+					
+				} else {
+					
+					Transfer transfer = new Transfer(
+							accountFrom.getBalance(),
+							accountTo.getBalance());
+					
+					ctx.result(gson.toJson(transfer));
+					ctx.status(422);
+					
+				}
+				
+			} else {
+				ctx.result("{}");
+				ctx.status(422);
+			}
 		} else {
+			ctx.result("{}");
 			ctx.status(404);
 		}
 	};
 
+}
+
+
+/**
+ * Class for an amount of withdrawal/deposit to be mapped from JSON
+ * @author Kevin Leader
+ */
+class WithdrawOrDeposit {
+	
+	private double withdraw;
+	private double deposit;
+	
+	protected WithdrawOrDeposit(double withdraw, double deposit) {
+		this.withdraw = withdraw;
+		this.deposit = deposit;
+	}
+
+	protected double getWithdraw() {
+		return withdraw;
+	}
+
+	protected double getDeposit() {
+		return deposit;
+	}
+	
+}
+
+/**
+ * Class for an amount to be mapped from JSON
+ * @author Kevin Leader
+ */
+class Amount {
+	
+	private double amount;
+	
+	protected Amount(double amount) {
+		this.amount = amount;
+	}
+	
+	protected double getAmount() {
+		return amount;
+	}
+	
+}
+
+/**
+ * Transfer object to be returned after a transfer
+ */
+class Transfer {
+	
+	private double accountFromBalance;
+	private double accountToBalance;
+	
+	protected Transfer(double accountFromBalance, double accountToBalance) {
+		this.accountFromBalance = accountFromBalance;
+		this.accountToBalance = accountToBalance;
+	}
+
+	protected double getAccountFromBalance() {
+		return accountFromBalance;
+	}
+
+	protected double getAccountToBalance() {
+		return accountToBalance;
+	}
+	
 }

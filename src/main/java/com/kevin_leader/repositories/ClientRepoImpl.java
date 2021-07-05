@@ -61,7 +61,7 @@ public class ClientRepoImpl implements ClientRepo {
 	@Override
 	public List<Client> getAllClients() {
 		
-		String sql = "SELECT * FROM clients";
+		String sql = "SELECT * FROM clients ORDER BY id";
 		
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -108,7 +108,7 @@ public class ClientRepoImpl implements ClientRepo {
 	public Client updateClient(Client changedClient) {
 
 		String sql = "UPDATE clients SET first_name = ?, last_name = ?,"
-				+ " email = ?, password = ? WHERE id = ?";
+				+ " email = ?, password = ? WHERE id = ? RETURNING *";
 		
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);

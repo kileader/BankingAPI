@@ -35,7 +35,7 @@ public class Account {
 	}
 	
 	/**
-	 * Id-less and balance-less constructor
+	 * Id-less constructor
 	 * @param clientId		id for the owner of the account
 	 * @param accountName	name for the account
 	 * @param accountType	type of account (checking, savings, etc.)
