@@ -2,7 +2,7 @@ package com.kevin_leader.repositories;
 
 import java.util.List;
 
-import com.kevin_leader.models.Account;
+import com.kevin_leader.models.database.Account;
 
 /**
  * Account repository to do CRUD and balance operations

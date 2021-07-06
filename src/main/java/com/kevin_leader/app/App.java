@@ -1,5 +1,7 @@
 package com.kevin_leader.app;
 
+import org.apache.log4j.Logger;
+
 import com.kevin_leader.controllers.BankingController;
 import com.kevin_leader.repositories.AccountRepo;
 import com.kevin_leader.repositories.AccountRepoImpl;
@@ -12,8 +14,11 @@ import io.javalin.Javalin;
 
 public class App {
 
+	private static final Logger log = Logger.getLogger(App.class);
+	
 	public static void main(String[] args) {
-
+		log.info("Start main method to establishRoutes and start app on 7000");
+		
 		// Establish our Javalin Object
 		Javalin app = Javalin.create();
 
@@ -27,6 +32,7 @@ public class App {
 	
 	// Establish routes (endpoints) for Javalin to manage
 	private static void establishRoutes(Javalin app) {		
+		log.info("Establish routes");
 		
 		// Instantiate banking controller
 		ClientRepo cr = new ClientRepoImpl();
@@ -50,9 +56,9 @@ public class App {
 		// Establish routes for accounts endpoint
 		app.post("/clients/:id/accounts", bc.addAccountForClient);
 		// body: accountName, accountType, balance
-		app.get("/clients/:id/accounts", bc.getAllAccountsForClient);
-		app.get("/clients/:id/accounts?amountLessThan=*&amountGreaterThan=*",
-				bc.getAllAccountsForClientBetweenBalances); // TODO: Fix This
+		app.get("/clients/:id/accounts", bc.getAccountsForClient);
+//		app.get("/clients/:id/accounts?amountLessThan=*&amountGreaterThan=*",
+//				bc.getAllAccountsForClientBetweenBalances); // TODO: Fix This
 		app.get("/clients/:cId/accounts/:aId", bc.getAccountForClient);
 		app.put("/clients/:cId/accounts/:aId", bc.updateAccountForClient);
 		// body: accountName, accountType, balance

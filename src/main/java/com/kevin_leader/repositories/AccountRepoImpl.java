@@ -7,7 +7,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.kevin_leader.models.Account;
+import org.apache.log4j.Logger;
+
+import com.kevin_leader.models.database.Account;
 import com.kevin_leader.util.JDBCConnection;
 
 /**
@@ -16,6 +18,8 @@ import com.kevin_leader.util.JDBCConnection;
  */
 public class AccountRepoImpl implements AccountRepo {
 	
+	private static final Logger log = 
+			Logger.getLogger(AccountRepoImpl.class);
 	public static Connection conn = JDBCConnection.getConnection();
 	
 	/**
@@ -25,6 +29,7 @@ public class AccountRepoImpl implements AccountRepo {
 	 * @throws SQLException
 	 */
 	private Account buildAccount(ResultSet rs) throws SQLException {
+		log.trace("Build Account from ResultSet");
 		Account account = new Account(
 				rs.getInt("id"),
 				rs.getInt("client_id"),
@@ -37,6 +42,7 @@ public class AccountRepoImpl implements AccountRepo {
 			
 	@Override
 	public Account getAccount(int id) {
+		log.info("Run getAccount(id)");
 		
 		String sql = "SELECT * FROM accounts WHERE id = ?";
 		
@@ -53,13 +59,14 @@ public class AccountRepoImpl implements AccountRepo {
 				return buildAccount(rs);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.warn("SQL did not run properly:", e);
 		}
 		return null;
 	}
 
 	@Override
 	public List<Account> getAllAccounts() {
+		log.info("Run getAllAccounts()");
 		
 		String sql = "SELECT * FROM accounts ORDER BY id";
 		
@@ -74,13 +81,14 @@ public class AccountRepoImpl implements AccountRepo {
 			return accounts;
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.warn("SQL did not run properly:", e);
 		}
 		return null;
 	}
 
 	@Override
 	public Account addAccount(Account newAccount) {
+		log.info("Run addAccount(newAccount)");
 
 		String sql = "INSERT INTO accounts VALUES "
 				+ "(default,?,?,?,?) RETURNING *";
@@ -100,13 +108,14 @@ public class AccountRepoImpl implements AccountRepo {
 				return buildAccount(rs);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.warn("SQL did not run properly:", e);
 		}
 		return null;
 	}
 
 	@Override
 	public Account updateAccount(Account changedAccount) {
+		log.info("Run updateAccount(changedAccount)");
 		
 		String sql = "UPDATE accounts SET client_id = ?, account_name = ?,"
 				+ " account_type = ?, balance = ? WHERE id = ? RETURNING *";
@@ -126,13 +135,14 @@ public class AccountRepoImpl implements AccountRepo {
 				return buildAccount(rs);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.warn("SQL did not run properly:", e);
 		}
 		return null;
 	}
 
 	@Override
 	public Account deleteAccount(int id) {
+		log.info("Run deleteAccount(id)");
 		
 		String sql = "DELETE FROM accounts WHERE id = ? RETURNING *";
 		
@@ -147,13 +157,14 @@ public class AccountRepoImpl implements AccountRepo {
 				return buildAccount(rs);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.warn("SQL did not run properly:", e);
 		}
 		return null;
 	}
 
 	@Override
 	public Account withdraw(int id, double withdrawalAmount) {
+		log.info("Run withdraw(id, withdrawalAmount)");
 		
 		String sql = "UPDATE accounts SET balance = ? WHERE id = ?"
 				+ " RETURNING *";
@@ -164,7 +175,7 @@ public class AccountRepoImpl implements AccountRepo {
 			try {
 				ps.setDouble(1, getAccount(id).getBalance() - withdrawalAmount);
 			} catch (NullPointerException e) {
-				e.printStackTrace();
+				log.warn("id doesn't match any account:", e);
 				return null;
 			}
 			
@@ -177,13 +188,14 @@ public class AccountRepoImpl implements AccountRepo {
 			}
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.warn("SQL did not run properly:", e);
 		}
 		return null;
 	}
 
 	@Override
 	public Account deposit(int id, double depositAmount) {
+		log.info("Run deleteAccount{id, depositAmount)");
 		
 		String sql = "UPDATE accounts SET balance = ? WHERE id = ?"
 				+ " RETURNING *";
@@ -194,7 +206,7 @@ public class AccountRepoImpl implements AccountRepo {
 			try {
 				ps.setDouble(1, getAccount(id).getBalance() + depositAmount);
 			} catch (NullPointerException e) {
-				e.printStackTrace();
+				log.warn("id doesn't match any account:", e);
 				return null;
 			}
 			
@@ -207,7 +219,7 @@ public class AccountRepoImpl implements AccountRepo {
 			}
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.warn("SQL did not run properly:", e);
 		}
 		return null;
 	}

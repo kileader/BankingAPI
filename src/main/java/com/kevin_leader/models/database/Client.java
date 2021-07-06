@@ -1,4 +1,4 @@
-package com.kevin_leader.models;
+package com.kevin_leader.models.database;
 
 /**
  * Javabean representing a bank client

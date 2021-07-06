@@ -2,8 +2,8 @@ package com.kevin_leader.services;
 
 import java.util.List;
 
-import com.kevin_leader.models.Account;
-import com.kevin_leader.models.Client;
+import com.kevin_leader.models.database.Account;
+import com.kevin_leader.models.database.Client;
 
 /**
  * Service operations for banking api
@@ -12,18 +12,20 @@ import com.kevin_leader.models.Client;
  */
 public interface BankingService {
 	
-	// These first 12 methods are the same as in the repositories package
 	public Client getClient(int id);
 	public List<Client> getAllClients();
 	public Client addClient(Client newClient);
 	public Client updateClient(Client changedClient);
 	public Client deleteClient(int id);
-
-	public List<Account> getAllAccounts();
-	
-	public Account withdraw(int id, double withdrawalAmount);
 	public Account deposit(int id, double depositAmount);
 	
+	/**
+	 * Check for insufficient funds then withdraw
+	 * @param id
+	 * @param withdrawalAmount
+	 * @return
+	 */
+	public Account withdraw(int id, double withdrawalAmount);
 	
 	/**
 	 * Check for client existence then add an account
@@ -71,16 +73,5 @@ public interface BankingService {
 	 * @return the account
 	 */
 	public Account deleteAccountForClient(int clientId, int accountId);
-	
-	/**
-	 * Transfer funds between two of a client's accounts
-	 * @param clientId				the client's id
-	 * @param accountToSendId		the account to send money from
-	 * @param accountToReceiveId	the account to receive money
-	 * @param transferAmount		the transfer amount
-	 * @return true if successful
-	 */
-	public boolean transferBetweenAccounts(int clientId, int accountToSendId,
-			int accountToReceiveId, double transferAmount);
 
 }

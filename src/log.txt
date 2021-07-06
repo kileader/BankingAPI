@@ -1,2 +1,0 @@
-2021-06-25 14:37:54 DEBUG Logic:16 - instantiate Logic
-2021-06-25 14:37:54 DEBUG Logic:26 - create new client

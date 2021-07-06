@@ -3,8 +3,10 @@ package com.kevin_leader.services;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.kevin_leader.models.Account;
-import com.kevin_leader.models.Client;
+import org.apache.log4j.Logger;
+
+import com.kevin_leader.models.database.Account;
+import com.kevin_leader.models.database.Client;
 import com.kevin_leader.repositories.AccountRepo;
 import com.kevin_leader.repositories.ClientRepo;
 
@@ -14,46 +16,50 @@ import com.kevin_leader.repositories.ClientRepo;
  */
 public class BankingServiceImpl implements BankingService {
 	
+	private static final Logger log =
+			Logger.getLogger(BankingServiceImpl.class);
 	public ClientRepo cr;
 	public AccountRepo ar;
 	
 	public BankingServiceImpl(ClientRepo cr, AccountRepo ar) {
+		log.info("Instantiate BankingServiceImpl");
 		this.cr = cr;
 		this.ar = ar;
 	}
 
 	@Override
 	public Client getClient(int id) {
+		log.debug("Run getClient(id)");
 		return cr.getClient(id);
 	}
 
 	@Override
 	public List<Client> getAllClients() {
+		log.debug("Run getAllClients()");
 		return cr.getAllClients();
 	}
 
 	@Override
 	public Client addClient(Client newClient) {
+		log.debug("Run addClient(newClient)");
 		return cr.addClient(newClient);
 	}
 
 	@Override
 	public Client updateClient(Client changedClient) {
+		log.debug("Run updateClient(changedClient)");
 		return cr.updateClient(changedClient);
 	}
 
 	@Override
 	public Client deleteClient(int id) {
+		log.debug("Run deleteClient(id)");
 		return cr.deleteClient(id);
-	}
-
-	@Override
-	public List<Account> getAllAccounts() {
-		return ar.getAllAccounts();
 	}
 	
 	@Override
 	public Account withdraw(int id, double withdrawalAmount) {
+		log.info("Run withdraw(id, withdrawalAmount)");
 		double balance = ar.getAccount(id).getBalance();
 		if (balance < withdrawalAmount) {
 			return null;
@@ -63,11 +69,13 @@ public class BankingServiceImpl implements BankingService {
 
 	@Override
 	public Account deposit(int id, double depositAmount) {
+		log.debug("Run deposit(id, depositAmount");
 		return ar.deposit(id, depositAmount);
 	}
 
 	@Override
 	public List<Account> getAllAccountsForClient(int clientId) {
+		log.info("Run getAllAccountsForClient(clientId)");
 		List<Account> clientAccounts = new ArrayList<>();
 		// Find the user's accounts
 		for (Account account : ar.getAllAccounts()) {
@@ -80,7 +88,9 @@ public class BankingServiceImpl implements BankingService {
 	
 	@Override
 	public List<Account> getAllAccountsForClientBetweenBalances(
-			int clientId, int lowLimit, int highLimit) { //TODO: Fix this
+			int clientId, int lowLimit, int highLimit) {
+		log.info("Run getAllAccountsForClientBetweenBalances("
+				+ "clientId, lowLimit, highLimit)");
 		List<Account> clientAccountsBetweenLimits = new ArrayList<>();
 		// Find the user's accounts between the limits
 		for (Account account : ar.getAllAccounts()) {
@@ -95,6 +105,7 @@ public class BankingServiceImpl implements BankingService {
 	
 	@Override
 	public Account getAccountForClient(int clientId, int accountId) {
+		log.info("Run getAccountForClient(clientId, accountId)");
 		// Find the account matching the clientId and accountId
 		for (Account account : ar.getAllAccounts()) {
 			if (account.getClientId() == clientId 
@@ -107,6 +118,7 @@ public class BankingServiceImpl implements BankingService {
 	
 	@Override
 	public Account addAccountForClient(Account accountToAdd) {
+		log.info("Run getAccountForClient(accountToAdd)");
 		for (Client client : cr.getAllClients()) {
 			if (accountToAdd.getClientId() == client.getId()) {
 				return ar.addAccount(accountToAdd);
@@ -117,6 +129,7 @@ public class BankingServiceImpl implements BankingService {
 	
 	@Override
 	public Account updateAccountForClient(Account accountToUpdate) {
+		log.info("Run updateAccountForClient(accountToUpdate)");
 		// Find the account matching the clientId and accountId
 		for (Account account : ar.getAllAccounts()) {
 			if (account.getClientId() == accountToUpdate.getClientId() 
@@ -129,6 +142,7 @@ public class BankingServiceImpl implements BankingService {
 
 	@Override
 	public Account deleteAccountForClient(int clientId, int accountId) {
+		log.info("Run deleteAccountForClient(clientId, accountId)");
 		List<Account> allAccounts = ar.getAllAccounts();
 		Account accountToDelete = null;
 		
@@ -140,35 +154,6 @@ public class BankingServiceImpl implements BankingService {
 			}
 		}
 		return null;
-	}
-	
-	@Override
-	public boolean transferBetweenAccounts(int clientId, int accountToSendId,
-			int accountToReceiveId, double transferAmount) {
-		List<Account> allAccounts = ar.getAllAccounts();
-		Account accountToSend = null;
-		Account accountToReceive = null;
-		// Find the account to send and account to receive
-		for (Account account : allAccounts) {
-			if (clientId == account.getClientId()) {
-				if (accountToSendId == account.getId()) {
-					accountToSend = account;
-				} else if (accountToReceiveId == account.getId()) {
-					accountToReceive = account;
-				} else if (accountToSend != null
-						&& accountToReceive != null) {
-					break;
-				}
-			}
-		}
-		// If at least one wasn't found, return false
-		if (accountToSend == null || accountToReceive == null) {
-			return false;
-		}
-		// Do withdraw and deposit methods to transfer
-		ar.withdraw(accountToSendId, transferAmount);
-		ar.deposit(accountToReceiveId, transferAmount);
-		return true;
 	}
 	
 }

@@ -2,9 +2,14 @@ package com.kevin_leader.controllers;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.google.gson.Gson;
-import com.kevin_leader.models.Account;
-import com.kevin_leader.models.Client;
+import com.kevin_leader.models.database.Account;
+import com.kevin_leader.models.database.Client;
+import com.kevin_leader.models.json_objects.Amount;
+import com.kevin_leader.models.json_objects.Transfer;
+import com.kevin_leader.models.json_objects.WithdrawOrDeposit;
 import com.kevin_leader.services.BankingService;
 
 import io.javalin.http.Handler;
@@ -15,14 +20,18 @@ import io.javalin.http.Handler;
  */
 public class BankingController {
 
+	final static Logger log = Logger.getLogger(BankingController.class);
 	BankingService bs;
 	Gson gson = new Gson();
 	
 	public BankingController(BankingService bs) {
+		log.info("Instantiate BankingController");
 		this.bs = bs;
 	}
 	
 	public Handler addClient = (ctx) -> {
+		log.info("Start Handler addClient");
+		
 		// Create client from JSON
 		Client c = gson.fromJson(ctx.body(), Client.class);
 		// Add the client to the database
@@ -41,6 +50,8 @@ public class BankingController {
 	};
 	
 	public Handler getAllClients = (context) -> {
+		log.info("Start Handler getAllClients");
+		
 		List<Client> clients = bs.getAllClients();
 		if (clients != null) {
 			context.result(gson.toJson(clients));
@@ -52,6 +63,8 @@ public class BankingController {
 	};
 	
 	public Handler getClientById = (ctx) -> {
+		log.info("Start Handler getClientById");
+		
 		// Set input
 		String input = ctx.pathParam("id");
 		int id;
@@ -60,6 +73,7 @@ public class BankingController {
 			id = Integer.parseInt(input);
 		} catch (NumberFormatException e) {
 			id = -1;
+			log.warn("id is not an int:", e);
 		}
 		// Get client by id
 		Client client = bs.getClient(id);
@@ -74,12 +88,16 @@ public class BankingController {
 	};
 	
 	public Handler updateClientById = (ctx) -> {
+		log.info("Start Handler updateClientById");
+		
 		String input = ctx.pathParam("id");
 		int clientId;
+		
 		try {
 			clientId = Integer.parseInt(input);
 		} catch (NumberFormatException e) {
 			clientId = -1;
+			log.warn("clientId is not an int:", e);
 		}
 		
 		Client c = gson.fromJson(ctx.body(), Client.class);
@@ -96,30 +114,35 @@ public class BankingController {
 	};
 	
 	public Handler deleteClientById = (ctx) -> {
+		log.info("Start Handler deleteClientById");
+		
 		String input = ctx.pathParam("id");
 		int id;
 		try {
 			id = Integer.parseInt(input);
 		} catch (NumberFormatException e) {
 			id = -1;
+			log.warn("id is not an int:", e);
 		}
 		// Delete client in database and return the deleted client
 		Client client = bs.deleteClient(id);
 		if (client != null) {
 			ctx.status(204);
 		} else {
-			ctx.result("{}");
 			ctx.status(404);
 		}
 	};
 	
 	public Handler addAccountForClient = (ctx) -> {
+		log.info("Start Handler addAccountForClient");
+		
 		String input = ctx.pathParam("id");
 		int clientId;
 		try {
 			clientId = Integer.parseInt(input);
 		} catch (NumberFormatException e) {
 			clientId = -1;
+			log.warn("clientId is not an int:", e);
 		}
 		// Create account from JSON
 		Account a = gson.fromJson(ctx.body(), Account.class);
@@ -136,28 +159,65 @@ public class BankingController {
 		}
 	};
 	
-	public Handler getAllAccountsForClient = (ctx) -> {
-		String input = ctx.pathParam("id");
+	public Handler getAccountsForClient = (ctx) -> {
+		log.info("Start Handler getAccountsForClient");
+		
+		String idIn = ctx.pathParam("id");
+		String maxBalanceIn = ctx.queryParam("amountLessThan");
+		String minBalanceIn = ctx.queryParam("amountGreaterThan");
 		
 		int clientId;
 		try {
-			clientId = Integer.parseInt(input);
+			clientId = Integer.parseInt(idIn);
 		} catch (NumberFormatException e) {
 			clientId = -1;
+			log.warn("clientId is not an int:", e);
 		}
 		
-		List<Account> accounts = bs.getAllAccountsForClient(clientId);
-		
-		if (accounts != null) {
-			ctx.result(gson.toJson(accounts));
-			ctx.status(200);
-		} else {
+		int maxBalance;
+		int minBalance;
+		if (maxBalanceIn != null && minBalanceIn != null) {
+			try {
+				maxBalance = Integer.parseInt(maxBalanceIn);
+			} catch (NumberFormatException e) {
+				maxBalance = -1;
+				log.warn("maxBalance is not an int:", e);
+			}
+			try {
+				minBalance = Integer.parseInt(minBalanceIn);
+			} catch (NumberFormatException e) {
+				minBalance = -1;
+				log.warn("minBalance is not an int:", e);
+			}
+			List<Account> accounts = bs.getAllAccountsForClientBetweenBalances(
+					clientId, minBalance, maxBalance);
+			if (accounts != null && !accounts.isEmpty()) {
+				ctx.result(gson.toJson(accounts));
+				ctx.status(200);
+			} else {
+				ctx.result("{}");
+				ctx.status(404);
+			}
+		} else if (clientId == -1) {
 			ctx.result("{}");
 			ctx.status(404);
+		} else {
+			List<Account> accounts = bs.getAllAccountsForClient(clientId);
+			
+			if (accounts != null) {
+				ctx.result(gson.toJson(accounts));
+				ctx.status(200);
+			} else {
+				ctx.result("{}");
+				ctx.status(404);
+			}
 		}
+		
 	};
 	
 	public Handler getAllAccountsForClientBetweenBalances = (ctx) -> {
+		log.info("Start Handler getAllAccountsForClientBetweenBalances");
+		
 		String idIn = ctx.pathParam("id");
 		String maxBalanceIn = ctx.splat(0);
 		String minBalanceIn = ctx.splat(1);
@@ -167,18 +227,21 @@ public class BankingController {
 			clientId = Integer.parseInt(idIn);
 		} catch (NumberFormatException e) {
 			clientId = -1;
+			log.warn("clientId is not an int:", e);
 		}
 		int maxBalance;
 		try {
 			maxBalance = Integer.parseInt(maxBalanceIn);
 		} catch (NumberFormatException e) {
 			maxBalance = -1;
+			log.warn("maxBalance is not an int:", e);
 		}
 		int minBalance;
 		try {
 			minBalance = Integer.parseInt(minBalanceIn);
 		} catch (NumberFormatException e) {
 			minBalance = -1;
+			log.warn("minBalance is not an int:", e);
 		}
 		
 		List<Account> accounts = bs.getAllAccountsForClientBetweenBalances(
@@ -193,6 +256,8 @@ public class BankingController {
 	};
 	
 	public Handler getAccountForClient = (ctx) -> {
+		log.info("Start Handler getAccountForClient");
+		
 		String cIdInput = ctx.pathParam("cId");
 		String aIdInput = ctx.pathParam("aId");
 		
@@ -201,6 +266,7 @@ public class BankingController {
 			clientId = Integer.parseInt(cIdInput);
 		} catch (NumberFormatException e) {
 			clientId = -1;
+			log.warn("clientId is not an int:", e);
 		}
 		
 		int accountId;
@@ -208,6 +274,7 @@ public class BankingController {
 			accountId = Integer.parseInt(aIdInput);
 		} catch (NumberFormatException e) {
 			accountId = -1;
+			log.warn("accountId is not an int:", e);
 		}
 		
 		Account a = bs.getAccountForClient(clientId, accountId);
@@ -221,6 +288,8 @@ public class BankingController {
 	};
 	
 	public Handler updateAccountForClient = (ctx) -> {
+		log.info("Start Handler updateAccountForClient");
+		
 		String cIdInput = ctx.pathParam("cId");
 		String aIdInput = ctx.pathParam("aId");
 		
@@ -231,6 +300,7 @@ public class BankingController {
 			clientId = Integer.parseInt(cIdInput);
 		} catch (NumberFormatException e) {
 			clientId = -1;
+			log.warn("clientId is not an int:", e);
 		}
 		
 		int accountId;
@@ -238,6 +308,7 @@ public class BankingController {
 			accountId = Integer.parseInt(aIdInput);
 		} catch (NumberFormatException e) {
 			accountId = -1;
+			log.warn("accountId is not an int:", e);
 		}
 
 		a.setId(accountId);
@@ -255,6 +326,8 @@ public class BankingController {
 	};
 	
 	public Handler deleteAccountForClient = (ctx) -> {
+		log.info("Start Handler deleteAccountForClient");
+		
 		String cIdInput = ctx.pathParam("cId");
 		String aIdInput = ctx.pathParam("aId");
 		
@@ -263,6 +336,7 @@ public class BankingController {
 			clientId = Integer.parseInt(cIdInput);
 		} catch (NumberFormatException e) {
 			clientId = -1;
+			log.warn("clientId is not an int:", e);
 		}
 		
 		int accountId;
@@ -270,6 +344,7 @@ public class BankingController {
 			accountId = Integer.parseInt(aIdInput);
 		} catch (NumberFormatException e) {
 			accountId = -1;
+			log.warn("accountId is not an int:", e);
 		}
 		
 		Account a = bs.deleteAccountForClient(clientId, accountId);
@@ -282,6 +357,8 @@ public class BankingController {
 	};
 	
 	public Handler withdrawOrDeposit = (ctx) -> {
+		log.info("Start Handler withdrawOrDeposit");
+		
 		String cIdInput = ctx.pathParam("cId");
 		String aIdInput = ctx.pathParam("aId");
 		
@@ -290,12 +367,14 @@ public class BankingController {
 			clientId = Integer.parseInt(cIdInput);
 		} catch (NumberFormatException e) {
 			clientId = -1;
+			log.warn("Clientd is not an int:", e);
 		}
 		int accountId;
 		try {
 			accountId = Integer.parseInt(aIdInput);
 		} catch (NumberFormatException e) {
 			accountId = -1;
+			log.warn("accountId is not an int:", e);
 		}
 		
 		Account a = bs.getAccountForClient(clientId, accountId);
@@ -329,6 +408,8 @@ public class BankingController {
 	};
 	
 	public Handler transferBetweenAccounts = (ctx) -> {
+		log.info("Start Handler transferBetweenAccounts");
+		
 		String cIdIn = ctx.pathParam("cId");
 		String aFromIdIn = ctx.pathParam("aFromId");
 		String aToIdIn = ctx.pathParam("aToId");
@@ -338,18 +419,21 @@ public class BankingController {
 			clientId = Integer.parseInt(cIdIn);
 		} catch (NumberFormatException e) {
 			clientId = -1;
+			log.warn("clientId is not an int:", e);
 		}
 		int accountFromId;
 		try {
 			accountFromId = Integer.parseInt(aFromIdIn);
 		} catch (NumberFormatException e) {
 			accountFromId = -1;
+			log.warn("accountFromId is not an int:", e);
 		}
 		int accountToId;
 		try {
 			accountToId = Integer.parseInt(aToIdIn);
 		} catch (NumberFormatException e) {
 			accountToId = -1;
+			log.warn("accountToId is not an int:", e);
 		}
 		
 		Account accountFrom = bs.getAccountForClient(clientId, accountFromId);
@@ -396,70 +480,4 @@ public class BankingController {
 		}
 	};
 
-}
-
-
-/**
- * Class for an amount of withdrawal/deposit to be mapped from JSON
- * @author Kevin Leader
- */
-class WithdrawOrDeposit {
-	
-	private double withdraw;
-	private double deposit;
-	
-	protected WithdrawOrDeposit(double withdraw, double deposit) {
-		this.withdraw = withdraw;
-		this.deposit = deposit;
-	}
-
-	protected double getWithdraw() {
-		return withdraw;
-	}
-
-	protected double getDeposit() {
-		return deposit;
-	}
-	
-}
-
-/**
- * Class for an amount to be mapped from JSON
- * @author Kevin Leader
- */
-class Amount {
-	
-	private double amount;
-	
-	protected Amount(double amount) {
-		this.amount = amount;
-	}
-	
-	protected double getAmount() {
-		return amount;
-	}
-	
-}
-
-/**
- * Transfer object to be returned after a transfer
- */
-class Transfer {
-	
-	private double accountFromBalance;
-	private double accountToBalance;
-	
-	protected Transfer(double accountFromBalance, double accountToBalance) {
-		this.accountFromBalance = accountFromBalance;
-		this.accountToBalance = accountToBalance;
-	}
-
-	protected double getAccountFromBalance() {
-		return accountFromBalance;
-	}
-
-	protected double getAccountToBalance() {
-		return accountToBalance;
-	}
-	
 }

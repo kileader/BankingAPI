@@ -7,7 +7,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.kevin_leader.models.Client;
+import org.apache.log4j.Logger;
+
+import com.kevin_leader.models.database.Client;
 import com.kevin_leader.util.JDBCConnection;
 
 /**
@@ -15,7 +17,9 @@ import com.kevin_leader.util.JDBCConnection;
  * @author Kevin Leader
  */
 public class ClientRepoImpl implements ClientRepo {
-
+	
+	private static final Logger log = 
+			Logger.getLogger(ClientRepoImpl.class);
 	public static Connection conn = JDBCConnection.getConnection();
 	
 	/**
@@ -25,6 +29,7 @@ public class ClientRepoImpl implements ClientRepo {
 	 * @throws SQLException
 	 */
 	private Client buildClient(ResultSet rs) throws SQLException {
+		log.trace("Run buildClient()");
 		Client client = new Client(
 				rs.getInt("id"),
 				rs.getString("first_name"),
@@ -37,6 +42,7 @@ public class ClientRepoImpl implements ClientRepo {
 
 	@Override
 	public Client getClient(int id) {
+		log.info("Run getClient(id)");
 		
 		String sql = "SELECT * FROM clients WHERE id = ?";
 		
@@ -53,13 +59,14 @@ public class ClientRepoImpl implements ClientRepo {
 				return buildClient(rs);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.warn("SQL did not run properly:", e);
 		}
 		return null;
 	}
 
 	@Override
 	public List<Client> getAllClients() {
+		log.info("Run getClientAllClients()");
 		
 		String sql = "SELECT * FROM clients ORDER BY id";
 		
@@ -74,13 +81,15 @@ public class ClientRepoImpl implements ClientRepo {
 			return clients;
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.warn("SQL did not run properly:", e);
 		}
 		return null;
 	}
 
 	@Override
 	public Client addClient(Client newClient) {
+		log.info("Run addClient(newClient)");
+		
 		String sql = "INSERT INTO clients VALUES "
 				+ "(default,?,?,?,?) RETURNING *";
 		
@@ -99,13 +108,14 @@ public class ClientRepoImpl implements ClientRepo {
 				return buildClient(rs);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.warn("SQL did not run properly:", e);
 		}
 		return null;
 	}
 
 	@Override
 	public Client updateClient(Client changedClient) {
+		log.info("Run updateClient(changedClient)");
 
 		String sql = "UPDATE clients SET first_name = ?, last_name = ?,"
 				+ " email = ?, password = ? WHERE id = ? RETURNING *";
@@ -125,13 +135,14 @@ public class ClientRepoImpl implements ClientRepo {
 				return buildClient(rs);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.warn("SQL did not run properly:", e);
 		}
 		return null;
 	}
 
 	@Override
 	public Client deleteClient(int id) {
+		log.info("Run deleteClient(id)");
 		
 		String sql = "DELETE FROM clients WHERE id = ? RETURNING *";
 		
@@ -146,7 +157,7 @@ public class ClientRepoImpl implements ClientRepo {
 				return buildClient(rs);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.warn("SQL did not run properly:", e);
 		}
 		return null;
 	}

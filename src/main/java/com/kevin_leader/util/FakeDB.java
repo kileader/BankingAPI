@@ -3,8 +3,8 @@ package com.kevin_leader.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.kevin_leader.models.Account;
-import com.kevin_leader.models.Client;
+import com.kevin_leader.models.database.Account;
+import com.kevin_leader.models.database.Client;
 
 /**
  * Fake database to be soon replaced

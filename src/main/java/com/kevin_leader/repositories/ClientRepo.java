@@ -2,7 +2,7 @@ package com.kevin_leader.repositories;
 
 import java.util.List;
 
-import com.kevin_leader.models.Client;
+import com.kevin_leader.models.database.Client;
 
 /**
  * Client repository to do CRUD operations
