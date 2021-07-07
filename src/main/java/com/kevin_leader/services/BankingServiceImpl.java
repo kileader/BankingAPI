@@ -20,11 +20,17 @@ public class BankingServiceImpl implements BankingService {
 			Logger.getLogger(BankingServiceImpl.class);
 	public ClientRepo cr;
 	public AccountRepo ar;
+	// Create static instance of allAccounts to use when
+	// querying the database is unnecessary
+	private static List<Account> allAccounts;
+	private static boolean shouldRefreshAllAccounts;
 	
 	public BankingServiceImpl(ClientRepo cr, AccountRepo ar) {
 		log.info("Instantiate BankingServiceImpl");
 		this.cr = cr;
 		this.ar = ar;
+		allAccounts = new ArrayList<>();
+		shouldRefreshAllAccounts = true;
 	}
 
 	@Override
@@ -54,31 +60,62 @@ public class BankingServiceImpl implements BankingService {
 	@Override
 	public Client deleteClient(int id) {
 		log.debug("Run deleteClient(id)");
-		return cr.deleteClient(id);
+		
+		Client deletedClient = cr.deleteClient(id);
+		
+		if (deletedClient == null) {
+			return null;
+		} else {
+			shouldRefreshAllAccounts = true;
+			return deletedClient;
+		}
 	}
 	
 	@Override
 	public Account withdraw(int id, double withdrawalAmount) {
 		log.info("Run withdraw(id, withdrawalAmount)");
+		
 		double balance = ar.getAccount(id).getBalance();
 		if (balance < withdrawalAmount) {
 			return null;
 		}
-		return ar.withdraw(id, withdrawalAmount);
+		
+		Account accountAfterWithdraw = ar.withdraw(id, withdrawalAmount);
+		
+		if (accountAfterWithdraw == null) {
+			return null;
+		} else {
+			shouldRefreshAllAccounts = true;
+			return accountAfterWithdraw;
+		}
 	}
 
 	@Override
 	public Account deposit(int id, double depositAmount) {
 		log.debug("Run deposit(id, depositAmount");
-		return ar.deposit(id, depositAmount);
-	}
+		
+		Account accountAfterDeposit = ar.deposit(id, depositAmount);
 
+		if (accountAfterDeposit == null) {
+			return null;
+		} else {
+			shouldRefreshAllAccounts = true;
+			return accountAfterDeposit;
+		}
+	}
+	
 	@Override
 	public List<Account> getAllAccountsForClient(int clientId) {
 		log.info("Run getAllAccountsForClient(clientId)");
+		
 		List<Account> clientAccounts = new ArrayList<>();
-		// Find the user's accounts
-		for (Account account : ar.getAllAccounts()) {
+		
+		if (shouldRefreshAllAccounts) {
+			allAccounts = ar.getAllAccounts();
+			shouldRefreshAllAccounts = false;
+		}
+		
+		for (Account account : allAccounts) {
 			if (account.getClientId() == clientId) {
 				clientAccounts.add(account);
 			}
@@ -91,9 +128,16 @@ public class BankingServiceImpl implements BankingService {
 			int clientId, int lowLimit, int highLimit) {
 		log.info("Run getAllAccountsForClientBetweenBalances("
 				+ "clientId, lowLimit, highLimit)");
+		
 		List<Account> clientAccountsBetweenLimits = new ArrayList<>();
-		// Find the user's accounts between the limits
-		for (Account account : ar.getAllAccounts()) {
+		
+		if (shouldRefreshAllAccounts) {
+			allAccounts = ar.getAllAccounts();
+			shouldRefreshAllAccounts = false;
+		}
+		
+		// Find accounts matching the clientId and between the limits
+		for (Account account : allAccounts) {
 			if (account.getClientId() == clientId
 					&& account.getBalance() < (double) highLimit
 					&& account.getBalance() > (double) lowLimit) {
@@ -106,8 +150,14 @@ public class BankingServiceImpl implements BankingService {
 	@Override
 	public Account getAccountForClient(int clientId, int accountId) {
 		log.info("Run getAccountForClient(clientId, accountId)");
+		
+		if (shouldRefreshAllAccounts) {
+			allAccounts = ar.getAllAccounts();
+			shouldRefreshAllAccounts = false;
+		}
+		
 		// Find the account matching the clientId and accountId
-		for (Account account : ar.getAllAccounts()) {
+		for (Account account : allAccounts) {
 			if (account.getClientId() == clientId 
 					&& account.getId() == accountId) {
 				 return account;
@@ -119,22 +169,46 @@ public class BankingServiceImpl implements BankingService {
 	@Override
 	public Account addAccountForClient(Account accountToAdd) {
 		log.info("Run getAccountForClient(accountToAdd)");
+		
+		Account addedAccount = null;
 		for (Client client : cr.getAllClients()) {
 			if (accountToAdd.getClientId() == client.getId()) {
-				return ar.addAccount(accountToAdd);
+				addedAccount = ar.addAccount(accountToAdd);
+				break;
 			}
 		}
-		return null;
+		
+		if (addedAccount == null) {
+			return null;
+		} else {
+			shouldRefreshAllAccounts = true;
+			return addedAccount;
+		}
 	}
 	
 	@Override
 	public Account updateAccountForClient(Account accountToUpdate) {
 		log.info("Run updateAccountForClient(accountToUpdate)");
+		
+		if (shouldRefreshAllAccounts) {
+			allAccounts = ar.getAllAccounts();
+			shouldRefreshAllAccounts = false;
+		}
+		
 		// Find the account matching the clientId and accountId
-		for (Account account : ar.getAllAccounts()) {
+		for (Account account : allAccounts) {
 			if (account.getClientId() == accountToUpdate.getClientId() 
 					&& account.getId() == accountToUpdate.getId()) {
-				return ar.updateAccount(accountToUpdate);
+				
+				Account updatedAccount = ar.updateAccount(accountToUpdate);
+				
+				if (updatedAccount == null) {
+					return null;
+				} else {
+					shouldRefreshAllAccounts = true;
+					return updatedAccount;
+				}
+				
 			}
 		}
 		return null;		
@@ -143,14 +217,22 @@ public class BankingServiceImpl implements BankingService {
 	@Override
 	public Account deleteAccountForClient(int clientId, int accountId) {
 		log.info("Run deleteAccountForClient(clientId, accountId)");
-		List<Account> allAccounts = ar.getAllAccounts();
-		Account accountToDelete = null;
+		
+		if (shouldRefreshAllAccounts) {
+			allAccounts = ar.getAllAccounts();
+			shouldRefreshAllAccounts = false;
+		}
 		
 		for (Account account : allAccounts) {
 			if (account.getClientId() == clientId 
 					&& account.getId() == accountId) {
-				accountToDelete = account;
-				return ar.deleteAccount(accountToDelete.getId());
+				Account deletedAccount = ar.deleteAccount(account.getId());
+				if (deletedAccount == null) {
+					return null;
+				} else {
+					shouldRefreshAllAccounts = true;
+					return deletedAccount;
+				}				
 			}
 		}
 		return null;

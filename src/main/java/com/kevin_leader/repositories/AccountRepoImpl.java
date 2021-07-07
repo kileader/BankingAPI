@@ -195,7 +195,7 @@ public class AccountRepoImpl implements AccountRepo {
 
 	@Override
 	public Account deposit(int id, double depositAmount) {
-		log.info("Run deleteAccount{id, depositAmount)");
+		log.info("Run deposit{id, depositAmount)");
 		
 		String sql = "UPDATE accounts SET balance = ? WHERE id = ?"
 				+ " RETURNING *";

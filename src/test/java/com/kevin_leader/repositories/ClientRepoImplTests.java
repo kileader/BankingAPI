@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -41,13 +43,15 @@ public class ClientRepoImplTests {
 	@Test
 	public void getAllClientsSuccess() {
 		log.info("Test getAllClientsSuccess");
-		assertTrue(cr.getAllClients().size() < 22
-				&& cr.getAllClients().size() > 18);
+		List<Client> allClients = cr.getAllClients();
+		assertTrue(allClients.size() < 22
+				&& allClients.size() > 18);
 	}
 	
 	@Test
 	public void addClientSuccess() {
 		log.info("Test addClientSuccess");
+		cr.deleteClient(21);
 		Client testClient = new Client(
 				21, "Ron", "Swanson","abc@123.xyz", "abc123");
 		Client addedClient = cr.addClient(testClient);

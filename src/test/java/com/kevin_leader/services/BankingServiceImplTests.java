@@ -15,7 +15,9 @@ import org.junit.Test;
 import com.kevin_leader.models.database.Account;
 import com.kevin_leader.models.database.Client;
 import com.kevin_leader.repositories.AccountRepo;
+import com.kevin_leader.repositories.AccountRepoImpl;
 import com.kevin_leader.repositories.ClientRepo;
+import com.kevin_leader.repositories.ClientRepoImpl;
 
 public class BankingServiceImplTests {
 	
@@ -28,6 +30,8 @@ public class BankingServiceImplTests {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception{
 		log.info("Set up new BankingService before class");
+		cr = new ClientRepoImpl();
+		ar = new AccountRepoImpl();
 		bs = new BankingServiceImpl(cr, ar);
 	}
 	
@@ -35,6 +39,8 @@ public class BankingServiceImplTests {
 	public static void tearDownAfterClass() throws Exception{
 		log.info("Tear down BankingService after class");
 		bs = null;
+		cr = null;
+		ar = null;
 	}
 	
 	@Test
@@ -56,17 +62,21 @@ public class BankingServiceImplTests {
 	public void addClientSuccess() {
 		log.info("Test addClientSuccess");
 		Client testClient = new Client(
-				21, "Ron", "Swanson","abc@123.xyz", "abc123");
+				"Ron", "Swanson","abc@123.xyz", "abc123");
 		Client addedClient = bs.addClient(testClient);
-		assertEquals(addedClient.toString(), testClient.toString());
+		assertTrue(addedClient != null);
+		assertEquals(addedClient.getFirstName(), "Ron");
+		assertEquals(addedClient.getLastName(), "Swanson");
+		assertEquals(addedClient.getEmail(), "abc@123.xyz");
+		assertEquals(addedClient.getPassword(), "abc123");
 	}
 	
 	@Test
 	public void updateClientSuccess() {
 		log.info("Test updateClientSuccess");
 		Client testClient = new Client(
-				11, "Ron", "Swanson","abc@123.xyz", "abc123");
-		Client beforeUpdateClient = bs.getClient(11);
+				16, "OK", "Saloon","abc@123.xyz", "abc123");
+		Client beforeUpdateClient = bs.getClient(16);
 		Client updatedClient = bs.updateClient(testClient);
 		assertNotEquals(beforeUpdateClient.toString(),
 				updatedClient.toString());
@@ -76,10 +86,10 @@ public class BankingServiceImplTests {
 	@Test
 	public void deleteClientSuccess() {
 		log.info("Test deleteClientSuccess");
-		Client beforeDeleteClient = bs.getClient(19);
-		assertEquals(bs.deleteClient(19).toString(),
+		Client beforeDeleteClient = bs.getClient(5);
+		assertEquals(bs.deleteClient(5).toString(),
 				beforeDeleteClient.toString());
-		assertNull(bs.getClient(19));
+		assertNull(bs.getClient(5));
 	}
 	
 	@Test
@@ -90,8 +100,6 @@ public class BankingServiceImplTests {
 		double afterWithdraw = bs.withdraw(46, amount).getBalance();
 		assertTrue(beforeWithdraw == 44.02);
 		assertTrue(afterWithdraw == 3.62);
-		double secondWithdraw = bs.withdraw(46, amount).getBalance();
-		assertTrue(secondWithdraw == 3.62); // too little to withdraw
 	}
 	
 	@Test
@@ -110,11 +118,71 @@ public class BankingServiceImplTests {
 		List<Account> accounts = bs.getAllAccountsForClient(7);
 		assertTrue(accounts.size() == 5);
 		List<Account> fakeIdAccounts = bs.getAllAccountsForClient(229);
-		assertNull(accounts);
+		assertTrue(fakeIdAccounts.size() == 0);
 	}
 	
 	@Test
 	public void getAllAccountsForClientBetweenBalancesSuccess() {
+		log.info("Test getAllAccountsForClientBetweenBalancesSuccess");
+		List<Account> badIdAccounts = 
+				bs.getAllAccountsForClientBetweenBalances(-1, -2, -3);
+		assertEquals(badIdAccounts.size(), 0);
+		List<Account> goodParamsAccounts =
+				bs.getAllAccountsForClientBetweenBalances(7, 400, 2000);
+		assertEquals(goodParamsAccounts.size(), 2);
+	}
+	
+	@Test
+	public void getAccountForClientSuccess() {
+		log.info("Test getAccountForClientSuccess");
+		Account expectedAccount = new Account(
+				34, 14, "Jaxspan", "savings", 969.99);
+		Account retreivedAccount = bs.getAccountForClient(14, 34);
+		Account wrongClientIdAccount = bs.getAccountForClient(1, 34);
+		assertEquals(expectedAccount.toString(), retreivedAccount.toString());
+		assertNull(wrongClientIdAccount);
+	}
+	
+	@Test
+	public void addAccountForClientSuccess() {
+		log.info("Test addAccountForClientSuccess");
+		Account accountToAdd = new Account(
+				9, "Trogdor Burninating", "burninating", 666.99);
+		Account addedAccount = bs.addAccountForClient(accountToAdd);
+		assertTrue(addedAccount != null);
+		assertEquals(addedAccount.getClientId(), 9);
+		assertEquals(addedAccount.getAccountName(), "Trogdor Burninating");
+		assertEquals(addedAccount.getAccountType(), "burninating");
+		assertTrue(addedAccount.getBalance() == 666.99);
 		
+		Account badClientIdAccount = new Account(
+				42, "Trogdor", "burninating", 666.99);
+		Account badAddAccount = bs.addAccountForClient(badClientIdAccount);
+		assertNull(badAddAccount);
+	}
+	
+	@Test
+	public void updateAccountForClientSuccess() {
+		log.info("Test updateAccountForClientSuccess");
+		Account accountToUpdateTo = new Account(
+				29, 14, "idk", "angsting", 0.01);
+		Account updatedAccount = bs.updateAccountForClient(accountToUpdateTo);
+		assertEquals(updatedAccount.toString(), accountToUpdateTo.toString());
+		
+		Account badClientIdAccount = new Account(
+				29, 42, "idk", "angsting", 0.01);
+		Account badUpdateAccount = 
+				bs.updateAccountForClient(badClientIdAccount);
+		assertNull(badUpdateAccount);
+	}
+	
+	@Test
+	public void deleteAccountForClientSuccess() {
+		log.info("Test deleteAccountForClientSuccess");
+		Account accountToDelete = bs.getAccountForClient(6, 21);
+		Account deletedAccount = bs.deleteAccountForClient(6, 21);
+		Account missingAccount = bs.getAccountForClient(6, 21);
+		assertNull(missingAccount);
+		assertEquals(accountToDelete.toString(), deletedAccount.toString());
 	}
 }

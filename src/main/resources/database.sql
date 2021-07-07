@@ -1,18 +1,18 @@
--- Hi I'm a comment
+-- Hi Database I'm a comment
 
-drop table clients;
 drop table accounts;
+drop table clients;
 
 create table clients (
-	id 				serial,
+	id 				serial primary key,
 	first_name 		varchar(25),
 	last_name		varchar(30),
 	email			varchar(50),
 	password		varchar(50)
 );
 create table accounts (
-	id 				serial,
-	client_id 		int,
+	id 				serial primary key,
+	client_id 		int references clients(id) on delete set null,
 	account_name 	varchar(50),
 	account_type 	varchar(20),
 	balance 		numeric(12,2)
@@ -89,3 +89,5 @@ insert into accounts (client_id, account_name, account_type, balance) values (9,
 insert into accounts (client_id, account_name, account_type, balance) values (13, 'Livetube', 'checking', 568.77);
 insert into accounts (client_id, account_name, account_type, balance) values (10, 'Gigaclub', 'checking', 95.45);
 insert into accounts (client_id, account_name, account_type, balance) values (16, 'Nlounge', 'savings', 2124.72);
+
+select * from accounts;

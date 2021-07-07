@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -40,8 +42,8 @@ public class AccountRepoImplTests {
 	@Test
 	public void getAllAccountsSuccess() {
 		log.info("Test getAllAccountsSuccess");
-		assertTrue(ar.getAllAccounts().size() < 52
-				&& ar.getAllAccounts().size() > 48);
+		List<Account> allAccounts = ar.getAllAccounts();
+		assertTrue(allAccounts.size() < 52 && allAccounts.size() > 48);
 	}
 	
 	@Test
