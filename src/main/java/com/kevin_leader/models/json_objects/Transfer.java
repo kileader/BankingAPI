@@ -3,7 +3,8 @@ package com.kevin_leader.models.json_objects;
 import org.apache.log4j.Logger;
 
 /**
- * Transfer object to be returned after a transfer
+ * Transfer object to be returned to client after a transfer
+ * @author Kevin Leader
  */
 public class Transfer {
 	

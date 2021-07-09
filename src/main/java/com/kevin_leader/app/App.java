@@ -12,6 +12,10 @@ import com.kevin_leader.services.BankingServiceImpl;
 
 import io.javalin.Javalin;
 
+/**
+ * Class for establilshing routes through Javalin to the Banking API
+ * @author Kevin Leader
+ */
 public class App {
 
 	private static final Logger log = Logger.getLogger(App.class);

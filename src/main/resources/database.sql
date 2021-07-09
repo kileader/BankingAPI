@@ -1,4 +1,3 @@
--- Hi Database I'm a comment
 
 drop table accounts;
 drop table clients;
@@ -10,6 +9,7 @@ create table clients (
 	email			varchar(50),
 	password		varchar(50)
 );
+
 create table accounts (
 	id 				serial primary key,
 	client_id 		int references clients(id) on delete set null,
@@ -91,3 +91,4 @@ insert into accounts (client_id, account_name, account_type, balance) values (10
 insert into accounts (client_id, account_name, account_type, balance) values (16, 'Nlounge', 'savings', 2124.72);
 
 select * from accounts;
+select * from clients;

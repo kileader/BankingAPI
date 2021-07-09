@@ -28,7 +28,7 @@ public class BankingController {
 		log.info("Instantiate BankingController");
 		this.bs = bs;
 	}
-	
+
 	public Handler addClient = (ctx) -> {
 		log.info("Start Handler addClient");
 		
@@ -45,8 +45,6 @@ public class BankingController {
 			ctx.result("{}");
 			ctx.status(400);
 		}
-//		ctx.result((c != null) ? gson.toJson(c) : "{}");
-//		ctx.status(201);
 	};
 	
 	public Handler getAllClients = (context) -> {
@@ -213,46 +211,6 @@ public class BankingController {
 			}
 		}
 		
-	};
-	
-	public Handler getAllAccountsForClientBetweenBalances = (ctx) -> {
-		log.info("Start Handler getAllAccountsForClientBetweenBalances");
-		
-		String idIn = ctx.pathParam("id");
-		String maxBalanceIn = ctx.splat(0);
-		String minBalanceIn = ctx.splat(1);
-		
-		int clientId;
-		try {
-			clientId = Integer.parseInt(idIn);
-		} catch (NumberFormatException e) {
-			clientId = -1;
-			log.warn("clientId is not an int:", e);
-		}
-		int maxBalance;
-		try {
-			maxBalance = Integer.parseInt(maxBalanceIn);
-		} catch (NumberFormatException e) {
-			maxBalance = -1;
-			log.warn("maxBalance is not an int:", e);
-		}
-		int minBalance;
-		try {
-			minBalance = Integer.parseInt(minBalanceIn);
-		} catch (NumberFormatException e) {
-			minBalance = -1;
-			log.warn("minBalance is not an int:", e);
-		}
-		
-		List<Account> accounts = bs.getAllAccountsForClientBetweenBalances(
-				clientId, minBalance, maxBalance);
-		if (accounts != null) {
-			ctx.result(gson.toJson(accounts));
-			ctx.status(200);
-		} else {
-			ctx.result("{}");
-			ctx.status(404);
-		}
 	};
 	
 	public Handler getAccountForClient = (ctx) -> {
@@ -479,5 +437,45 @@ public class BankingController {
 			ctx.status(404);
 		}
 	};
+	
+//	public Handler getAllAccountsForClientBetweenBalances = (ctx) -> {
+//		log.info("Start Handler getAllAccountsForClientBetweenBalances");
+//		
+//		String idIn = ctx.pathParam("id");
+//		String maxBalanceIn = ctx.splat(0);
+//		String minBalanceIn = ctx.splat(1);
+//		
+//		int clientId;
+//		try {
+//			clientId = Integer.parseInt(idIn);
+//		} catch (NumberFormatException e) {
+//			clientId = -1;
+//			log.warn("clientId is not an int:", e);
+//		}
+//		int maxBalance;
+//		try {
+//			maxBalance = Integer.parseInt(maxBalanceIn);
+//		} catch (NumberFormatException e) {
+//			maxBalance = -1;
+//			log.warn("maxBalance is not an int:", e);
+//		}
+//		int minBalance;
+//		try {
+//			minBalance = Integer.parseInt(minBalanceIn);
+//		} catch (NumberFormatException e) {
+//			minBalance = -1;
+//			log.warn("minBalance is not an int:", e);
+//		}
+//		
+//		List<Account> accounts = bs.getAllAccountsForClientBetweenBalances(
+//				clientId, minBalance, maxBalance);
+//		if (accounts != null) {
+//			ctx.result(gson.toJson(accounts));
+//			ctx.status(200);
+//		} else {
+//			ctx.result("{}");
+//			ctx.status(404);
+//		}
+//	};
 
 }
